@@ -1,0 +1,23 @@
+{
+  "name": "its-api-test-suite",
+  "version": "1.0.0", 
+  "description": "AI-native API testing platform foundation for ITS API",
+  "scripts": {
+    "test": "playwright test",
+    "test:contract": "playwright test tests/contract/",
+    "build": "tsc",
+    "clean": "rm -rf dist/ src/generated/ tests/contract/coverage/"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.40.0",
+    "ajv": "^8.12.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "openapi-typescript-codegen": "^0.25.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
