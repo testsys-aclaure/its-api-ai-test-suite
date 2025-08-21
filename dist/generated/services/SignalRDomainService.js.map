@@ -1,1 +1,0 @@
-{"version":3,"file":"SignalRDomainService.js","sourceRoot":"","sources":["../../../src/generated/services/SignalRDomainService.ts"],"names":[],"mappings":";;;AAMA,6CAA0C;AAC1C,6CAAuD;AACvD,MAAa,oBAAoB;IAC7B;;;;;OAKG;IACI,MAAM,CAAC,kBAAkB;QAC5B,OAAO,IAAA,iBAAS,EAAC,iBAAO,EAAE;YACtB,MAAM,EAAE,KAAK;YACb,GAAG,EAAE,uBAAuB;SAC/B,CAAC,CAAC;IACP,CAAC;CACJ;AAbD,oDAaC"}

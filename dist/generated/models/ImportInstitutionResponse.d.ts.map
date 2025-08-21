@@ -1,1 +1,0 @@
-{"version":3,"file":"ImportInstitutionResponse.d.ts","sourceRoot":"","sources":["../../../src/generated/models/ImportInstitutionResponse.ts"],"names":[],"mappings":"AAIA,MAAM,MAAM,yBAAyB,GAAG;IACpC,gBAAgB,CAAC,EAAE,MAAM,CAAC;IAC1B,wBAAwB,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IACzC,MAAM,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CAC1B,CAAC"}

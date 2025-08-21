@@ -1,1 +1,0 @@
-{"version":3,"file":"RegistrationDeleteStatus.d.ts","sourceRoot":"","sources":["../../../src/generated/models/RegistrationDeleteStatus.ts"],"names":[],"mappings":"AAIA,MAAM,MAAM,wBAAwB,GAAG;IACnC;;OAEG;IACH,iBAAiB,CAAC,EAAE,MAAM,CAAC;IAC3B;;OAEG;IACH,yBAAyB,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC1C;;OAEG;IACH,MAAM,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CAC1B,CAAC"}

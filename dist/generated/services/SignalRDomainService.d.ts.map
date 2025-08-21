@@ -1,1 +1,0 @@
-{"version":3,"file":"SignalRDomainService.d.ts","sourceRoot":"","sources":["../../../src/generated/services/SignalRDomainService.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,+BAA+B,EAAE,MAAM,2CAA2C,CAAC;AACjG,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,2BAA2B,CAAC;AAGnE,qBAAa,oBAAoB;IAC7B;;;;;OAKG;WACW,kBAAkB,IAAI,iBAAiB,CAAC,+BAA+B,CAAC;CAMzF"}

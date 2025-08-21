@@ -1,1 +1,0 @@
-{"version":3,"file":"EventData.d.ts","sourceRoot":"","sources":["../../../src/generated/models/EventData.ts"],"names":[],"mappings":"AAIA,MAAM,MAAM,SAAS,GAAG;IACpB,aAAa,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC9B;;OAEG;IACH,OAAO,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IACxB;;OAEG;IACH,UAAU,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC3B;;OAEG;IACH,gBAAgB,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CACpC,CAAC"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"EventExamineeResponse.d.ts","sourceRoot":"","sources":["../../../src/generated/models/EventExamineeResponse.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,oBAAoB,CAAC;AAC3D,MAAM,MAAM,qBAAqB,GAAG;IAChC;;OAEG;IACH,UAAU,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC3B;;OAEG;IACH,SAAS,CAAC,EAAE,KAAK,CAAC,gBAAgB,CAAC,GAAG,IAAI,CAAC;CAC9C,CAAC"}

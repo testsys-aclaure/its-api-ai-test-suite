@@ -1,1 +1,0 @@
-{"version":3,"file":"ExamineeRecordResponse.d.ts","sourceRoot":"","sources":["../../../src/generated/models/ExamineeRecordResponse.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,cAAc,CAAC;AAC/C,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,mBAAmB,CAAC;AACzD,MAAM,MAAM,sBAAsB,GAAG;IACjC,KAAK,CAAC,EAAE,UAAU,CAAC;IACnB,IAAI,CAAC,EAAE,eAAe,CAAC;CAC1B,CAAC"}

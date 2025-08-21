@@ -1,1 +1,0 @@
-{"version":3,"file":"OrderRequest.d.ts","sourceRoot":"","sources":["../../../src/generated/models/OrderRequest.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,KAAK,EAAE,MAAM,SAAS,CAAC;AACrC,MAAM,MAAM,YAAY,GAAG;IACvB,MAAM,CAAC,EAAE,KAAK,CAAC,KAAK,CAAC,GAAG,IAAI,CAAC;CAChC,CAAC"}
