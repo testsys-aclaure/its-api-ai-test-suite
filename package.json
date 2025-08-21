@@ -1,0 +1,33 @@
+{
+  "name": "its-api-ai-test-suite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "@openapitools/openapi-generator-cli": "^2.22.0",
+    "@playwright/test": "^1.55.0",
+    "@redocly/cli": "^2.0.6",
+    "@stoplight/spectral-cli": "^6.15.0",
+    "@types/node": "^24.3.0",
+    "ajv": "^8.17.1",
+    "ajv-cli": "^0.6.0",
+    "ajv-formats": "^3.0.1",
+    "json-schema-faker": "^0.5.9",
+    "openapi-sampler": "^1.6.1",
+    "openapi-schema-to-json-schema": "^2.2.0",
+    "openapi-typescript-codegen": "^0.29.0",
+    "swagger-cli": "^4.0.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
