@@ -1,0 +1,21 @@
+{
+  "tokenUrl": "https://identity-staging.testsys.io/connect/token",
+  "tokenUrlSource": "env",
+  "securityScheme": {
+    "name": "Default",
+    "type": "http",
+    "scheme": "bearer",
+    "bearerFormat": "ITS provided JWT"
+  },
+  "globalSecurity": [
+    {
+      "Default": []
+    }
+  ],
+  "perOperationOverrides": [],
+  "notes": [
+    "Token URL discovered from environment file (238-stg.json) auth-url field",
+    "All operations use the global Default security scheme (Bearer token)",
+    "No per-operation security overrides detected"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "tools": [
+    {"name":"Lint OpenAPI","cmd":"npm run lint:openapi","purpose":"validate spec"},
+    {"name":"Gen Client","cmd":"npm run gen:client","purpose":"generate TS client"},
+    {"name":"Gen Schemas","cmd":"npm run gen:schemas","purpose":"deref and emit schemas"},
+    {"name":"Gen Tests","cmd":"npm run gen:tests","purpose":"create Playwright tests from plan"},
+    {"name":"Run Tests","cmd":"npm run test:contract","purpose":"execute contract tests"},
+    {"name":"Verify Coverage","cmd":"npm run verify:coverage","purpose":"coverage gate"}
+  ],
+  "guards": {
+    "allowMutations": false,
+    "allowedEnvs": ["238-stg","uat","dev"]
+  }
+}

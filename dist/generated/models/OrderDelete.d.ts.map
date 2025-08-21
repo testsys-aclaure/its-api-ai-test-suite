@@ -1,0 +1,1 @@
+{"version":3,"file":"OrderDelete.d.ts","sourceRoot":"","sources":["../../../src/generated/models/OrderDelete.ts"],"names":[],"mappings":"AAIA;;GAEG;AACH,MAAM,MAAM,WAAW,GAAG;IACtB,UAAU,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC3B,YAAY,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC7B,eAAe,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CACnC,CAAC"}

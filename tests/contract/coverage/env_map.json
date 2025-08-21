@@ -1,0 +1,83 @@
+{
+  "source": "environments/238-stg.json",
+  "mappings": {
+    "baseURL": {
+      "postmanKey": "baseUrl",
+      "envKey": "baseURL",
+      "value": "https://api-staging.testsys.io",
+      "required": true,
+      "usedByOperations": ["all"]
+    },
+    "client_id": {
+      "postmanKey": "client-id",
+      "envKey": "client_id",
+      "value": "CC3E03A8-06FB-4913-A86A-4873CF240EAE",
+      "required": true,
+      "usedByOperations": ["all"],
+      "notes": ["OAuth2 client credentials - normalized hyphen to underscore"]
+    },
+    "client_secret": {
+      "postmanKey": "client-secret",
+      "envKey": "client_secret",
+      "value": "foAh6U1kQ1mW!lyWo*P9pG&Tt5%%JAb",
+      "required": true,
+      "usedByOperations": ["all"],
+      "notes": ["OAuth2 client credentials - normalized hyphen to underscore"]
+    },
+    "program-id": {
+      "postmanKey": "program-id",
+      "envKey": "program-id",
+      "value": "238",
+      "required": true,
+      "usedByOperations": ["ChannelInstitutionQuery", "EventAuthorizationQuery", "EventClassQuery", "EventQuery", "ExamineeAuditQuery", "ExamineeEventsQuery", "ExamineeLongitudinalSegmentDetailQuery", "ExamineeLongitudinalSegmentsQuery", "ExamineeQuery", "ExamineeRecordQuery", "FormDefinitionQuery", "FormQuery", "FormReportQuery", "FormResourceFilesQuery", "InventoryQuery", "IWToolExportTestsQuery", "IWToolImportQuery", "LongitudinalGroupExamineesQuery", "MessageHistoryQuery", "OrderQuery", "PackageFormsQuery", "RegistrationQuery", "RemoteAdminUrlsQuery", "RemoteExamineeDataQuery", "RemotePracticeChecksQuery", "RemoteSessionDataQuery", "RemoteSessionsQuery", "RemoteSystemChecksQuery", "ResultIdentifierQuery", "ResultQuery", "SabbaticalQuery", "SecureBrowserErrorsQuery", "SessionQuery", "SignalRDomainQuery", "TestFormsQuery", "TestPretestReferencesQuery", "TestQuery", "TimezoneQuery", "UserAccessQuery", "UserQuery"],
+      "notes": ["Global context parameter - used across most read operations"]
+    },
+    "vendor-id": {
+      "postmanKey": "vendor-id",
+      "envKey": "vendor-id",
+      "value": "14",
+      "required": false,
+      "usedByOperations": [],
+      "notes": ["Global context parameter - usage varies by operation"]
+    },
+    "sponsor-id": {
+      "postmanKey": "sponsor-id",
+      "envKey": "sponsor-id",
+      "value": "12",
+      "required": false,
+      "usedByOperations": [],
+      "notes": ["Global context parameter - usage varies by operation"]
+    },
+    "scope": {
+      "postmanKey": "scope",
+      "envKey": "scope",
+      "value": "https://api-staging.testsys.io",
+      "required": true,
+      "usedByOperations": ["all"],
+      "notes": ["OAuth2 scope"]
+    },
+    "auth-url": {
+      "postmanKey": "auth-url",
+      "envKey": "token_url",
+      "value": "https://identity-staging.testsys.io/connect/token",
+      "required": true,
+      "usedByOperations": ["all"],
+      "notes": ["OAuth2 token endpoint"]
+    }
+  },
+  "dotEnvExampleKeys": [
+    "baseURL=https://api-staging.testsys.io",
+    "client_id=CC3E03A8-06FB-4913-A86A-4873CF240EAE",
+    "client_secret=foAh6U1kQ1mW!lyWo*P9pG&Tt5%%JAb",
+    "program_id=238",
+    "vendor_id=14",
+    "sponsor_id=12",
+    "scope=https://api-staging.testsys.io",
+    "token_url=https://identity-staging.testsys.io/connect/token"
+  ],
+  "notes": [
+    "Hyphen keys (client-id, client-secret, etc.) normalized to underscore for environment variables",
+    "program-id is a critical context parameter required by most operations",
+    "vendor-id and sponsor-id are optional context parameters"
+  ]
+}

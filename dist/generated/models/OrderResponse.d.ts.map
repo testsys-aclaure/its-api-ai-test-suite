@@ -1,0 +1,1 @@
+{"version":3,"file":"OrderResponse.d.ts","sourceRoot":"","sources":["../../../src/generated/models/OrderResponse.ts"],"names":[],"mappings":"AAIA,MAAM,MAAM,aAAa,GAAG;IACxB;;OAEG;IACH,UAAU,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC3B;;OAEG;IACH,YAAY,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC7B;;OAEG;IACH,MAAM,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IACvB,OAAO,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CAC3B,CAAC"}

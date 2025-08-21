@@ -1,0 +1,59 @@
+{
+	"id": "52b7605b-57ef-4796-88f3-b7a9f7389c0f",
+	"name": "ITS API STG TOEIC 238",
+	"values": [
+		{
+			"key": "baseUrl",
+			"value": "https://api-staging.testsys.io",
+			"enabled": true
+		},
+		{
+			"key": "program-id",
+			"value": "238",
+			"enabled": true
+		},
+		{
+			"key": "client-id",
+			"value": "CC3E03A8-06FB-4913-A86A-4873CF240EAE",
+			"enabled": true
+		},
+		{
+			"key": "client-secret",
+			"value": "foAh6U1kQ1mW!lyWo*P9pG&Tt5%%JAb",
+			"enabled": true
+		},
+		{
+			"key": "scope",
+			"value": "https://api-staging.testsys.io",
+			"enabled": true
+		},
+		{
+			"key": "vendor-id",
+			"value": "14",
+			"enabled": true
+		},
+		{
+			"key": "sponsor-id",
+			"value": "12",
+			"enabled": true
+		},
+		{
+			"key": "auth-url",
+			"value": "https://identity-staging.testsys.io/connect/token",
+			"enabled": true
+		},
+		{
+			"key": "program-institution-id",
+			"value": "1009048",
+			"enabled": true
+		},
+		{
+			"key": "parent-program-institution-id",
+			"value": "1009159",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-07-21T18:27:03.088Z",
+	"_postman_exported_using": "Postman/11.54.1"
+}

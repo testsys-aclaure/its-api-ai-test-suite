@@ -1,0 +1,1 @@
+{"version":3,"file":"ImportQueryError.d.ts","sourceRoot":"","sources":["../../../src/generated/models/ImportQueryError.ts"],"names":[],"mappings":"AAIA,MAAM,MAAM,gBAAgB,GAAG;IAC3B,YAAY,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAC7B,eAAe,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;IAChC,mBAAmB,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CACvC,CAAC"}
