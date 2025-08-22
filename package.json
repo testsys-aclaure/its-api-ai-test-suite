@@ -1,0 +1,51 @@
+{
+  "name": "its-api-ai-test-suite",
+  "version": "1.0.0",
+  "description": "AI-native educational testing platform automation with natural language interface and intelligent operation discovery",
+  "type": "module",
+  "main": "dist/src/api/ITSApi.js",
+  "types": "dist/src/api/ITSApi.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "playwright test",
+    "test:unit": "playwright test --grep \"parameter validation\"",
+    "test:integration": "playwright test --grep \"REAL API SUCCESS\"",
+    "test:semantic": "playwright test --grep \"SEMANTIC INTERFACE\"", 
+    "test:metadata": "playwright test --grep \"METADATA COMPLETENESS\"",
+    "test:ai": "npm run test:semantic && npm run test:metadata",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "zod": "^3.22.4",
+    "undici": "^6.6.2",
+    "yaml": "^2.3.4",
+    "jsonpointer": "^5.0.1",
+    "fast-deep-equal": "^3.1.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.11.5",
+    "@playwright/test": "^1.41.1",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/parser": "^6.19.1",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "prettier": "^3.2.4"
+  },
+  "keywords": [
+    "educational-testing",
+    "api-automation", 
+    "typescript",
+    "ai-native",
+    "natural-language-interface",
+    "semantic-operations",
+    "business-workflow-automation"
+  ],
+  "author": "",
+  "license": "ISC"
+}
