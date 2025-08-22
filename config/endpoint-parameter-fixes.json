@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "description": "Endpoint-specific parameter fixes based on actual API error responses",
+    "generated": "2025-08-22T05:30:31.605Z",
+    "universal": {
+      "program-id": "238",
+      "program-institution-id": "1009048"
+    }
+  },
+  "endpoints": {
+    "/user/access/query": {
+      "vendor-id": "14"
+    },
+    "/User/query": {
+      "sponsor-id": "12"
+    },
+    "/event/authorizations/Query": {
+      "event-id": "1"
+    },
+    "/event-class/examinees/query": {
+      "event-class-id": "1"
+    },
+    "/examinee/events/query": {
+      "examinee-id": "1"
+    },
+    "/Form/Query": {
+      "test-id": "1"
+    },
+    "/examinee/record/query": {
+      "record-id": "1",
+      "table-name": "examinee"
+    },
+    "/session/query": {
+      "session-id": "1"
+    }
+  }
+}

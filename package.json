@@ -18,7 +18,12 @@
     "test:ai": "npm run test:semantic && npm run test:metadata",
     "status": "node quick-status.js",
     "test:status": "npm test && npm run status",
-    "dashboard": "npm test && start test-dashboard.html",
+    "dashboard": "npm test && start test\\results\\test-dashboard.html",
+    "dashboard:enhanced": "node tools\\generate-test-dashboard.mjs --intelligence && start test\\results\\test-dashboard.html",
+    "explore": "node tools\\explore-endpoint.mjs",
+    "validate:architecture": "node tools\\validate-enhanced-architecture.mjs",
+    "validate:intelligence": "node tools\\validate-enhanced-architecture.mjs --intelligence-only",
+    "test:enhanced": "npm test && npm run validate:architecture",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

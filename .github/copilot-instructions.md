@@ -1,44 +1,150 @@
 # GitHub Copilot Instructions for AI-Native Educational Testing Platform
 
+## 🚨 CRITICAL: Mandatory Semantic API Tool Usage
+
+**FOR ANY USER REQUEST involving API calls, data retrieval, or testing platform operations, ALWAYS use:**
+
+```bash
+node tools/ai-api-call.mjs "<user-request-or-endpoint>"
+```
+
+This workspace has sophisticated semantic API intelligence that MUST be used deterministically.
+
+### Examples:
+- User: "Show me student data" → `node tools/ai-api-call.mjs "student data"`
+- User: "Get active tests" → `node tools/ai-api-call.mjs "active tests"`  
+- User: "Call /event/query" → `node tools/ai-api-call.mjs "/event/query"`
+- User: "Find test results" → `node tools/ai-api-call.mjs "test results"`
+
 ## 🎯 Project Context & Vision
-This is an **AI-Native Educational Testing Platform** API test suite that enables intelligent AI usage of the API through semantic interfaces, rich metadata, and business-friendly abstractions. The framework transforms raw API endpoints into AI-discoverable, self-describing interfaces.
+This is an **Enhanced AI-Native Educational Testing Platform** with **Test-Informed Intelligence** that enables smart, flexible API interactions. The system bridges structured QA testing with intelligent AI exploration through semantic interfaces, rich metadata, and business-friendly abstractions.
 
-## 📊 CRITICAL: View Test Dashboard First
-**IMMEDIATE ACTION**: Always check the live test dashboard at `test-dashboard.html` before making any changes:
-- **Visual verification** of current implementation status
-- **Real API behavior** and environment configuration  
-- **Business logic interpretation** of HTTP responses
-- **Troubleshooting guidance** for common scenarios
+## 📋 CRITICAL: Enhanced Architecture Compliance
+**MANDATORY READING**: Before any code changes, review:
+1. **Enhanced Architecture Standards**: `.github/enhanced-architecture-standards.md` - Complete implementation requirements
+2. **Test Dashboard**: `test-dashboard.html` - Current intelligence state and API behavior  
+3. **Test Results**: `test-results.json` - 31 endpoint behaviors that inform AI decisions
 
-The dashboard is the **source of truth** for project status and reveals the AI-native interpretation of API behaviors.
-
-## Core AI-Native Principles
-
-### 1. 🧠 Semantic-First Development
-Always create **semantic interfaces** alongside technical implementations:
+## 🧠 Test-Informed Intelligence System (MANDATORY)
+**ENFORCEMENT**: All API interactions MUST use the enhanced intelligence system:
 
 ```typescript
-// ✅ ALWAYS include semantic wrappers for AI discoverability
-static async findActiveEvents(programId: string, institution?: string): Promise<any> {
-  return this.getEvents({ program: programId, institution, activeOnly: true });
+// ✅ REQUIRED: Use intelligent calling as primary method
+const result = await EnhancedDirectAPITools.intelligentCall(endpoint, params);
+
+// ✅ REQUIRED: Fall back to exploration mode when needed  
+if (!result.success && result.explorationCapability) {
+  const explorResult = await EnhancedDirectAPITools.explore(endpoint, params);
 }
 
-// ✅ ALWAYS provide natural language mapping
-static async getEvents(intent: SemanticIntent): Promise<any> {
-  // Map natural language to technical parameters
-  if (intent.program) params['program-id'] = intent.program;
-  if (intent.institution) params['program-institution-id'] = intent.institution;
+// ❌ FORBIDDEN: Raw API calls without intelligence layer
+const rawResult = await fetch(url); // NEVER DO THIS
+```
+
+## 📊 CRITICAL: Dashboard-First Development  
+**IMMEDIATE ACTION**: Always check the live test dashboard at `test-dashboard.html` before making any changes:
+- **Intelligence state** - Current test-informed behavior patterns
+- **Visual verification** of enhanced API calling with AI interpretation
+- **Real API behavior** - 74% success rate (23/31 endpoints working)
+- **Business logic interpretation** - AI insights for HTTP responses
+- **Exploration capabilities** - Troubleshooting guidance for problematic endpoints
+
+The dashboard shows **test-informed intelligence in action** and is the source of truth for system behavior.
+
+## Enhanced AI-Native Principles (MANDATORY)
+
+### 1. 🧠 Test-Informed Development (NEW)
+**ENFORCEMENT**: All development must be informed by actual test results:
+
+```typescript
+// ✅ REQUIRED: Load intelligence from test results
+const intelligence = TestInformedIntelligence.getInstance();
+const guidance = intelligence.getAIGuidance(endpoint, params);
+
+// ✅ REQUIRED: Use guidance for API strategy
+switch (guidance.approach) {
+  case 'intelligent': return this.intelligentCall(endpoint, guidance.suggestedParameters);
+  case 'exploration': return this.explore(endpoint, params);  
+  case 'hybrid': // Try intelligent first, fallback to exploration
+}
+
+// ❌ FORBIDDEN: Ignoring test-informed intelligence
+const result = await this.makeRequest(endpoint, params); // NEVER DO THIS
+```
+
+### 2. 🔍 Exploration-Mode Support (NEW) 
+**ENFORCEMENT**: All endpoints must support troubleshooting exploration:
+
+```typescript
+// ✅ REQUIRED: Implement exploration capability
+static async explore(endpoint: string, baseParams: any): Promise<EnhancedAPIResponse> {
+  const strategies = [
+    () => this.tryMinimalParams(endpoint, baseParams),
+    () => this.tryCommonParams(endpoint, baseParams), 
+    () => this.trySuccessfulPatterns(endpoint, baseParams)
+  ];
+  
+  for (const strategy of strategies) {
+    const result = await strategy();
+    if (result.success) return result;
+  }
+  
+  return this.generateFailureAnalysis(endpoint, baseParams);
 }
 ```
 
-### 2. 📖 Rich Metadata for AI Discovery
-Every endpoint MUST have comprehensive metadata:
+### 3. 💡 AI Interpretation (NEW)
+**ENFORCEMENT**: All responses must include business context and AI insights:
 
 ```typescript
-static readonly metadata: EndpointMetadata = {
+// ✅ REQUIRED: Enhanced response with AI interpretation
+interface EnhancedAPIResponse {
+  success: boolean;
+  data?: any;
+  error?: string;
+  httpStatus: number;
+  aiInterpretation: string;           // MANDATORY: AI explanation
+  businessContext: string;            // MANDATORY: Educational testing context
+  suggestedFixes?: string[];          // MANDATORY: Actionable guidance
+  explorationCapability: boolean;    // MANDATORY: Can this be explored?
+}
+```
+
+### 4. 📊 Semantic-First Development (ENHANCED)
+Always create **semantic interfaces** alongside technical implementations with intelligence:
+
+```typescript
+// ✅ ALWAYS include semantic wrappers with test-informed behavior
+static async findActiveEvents(programId: string, institution?: string): Promise<any> {
+  // Use intelligent calling instead of basic getEvents
+  return EnhancedDirectAPITools.intelligentCall('/event/Query', { 
+    'program-id': programId, 
+    'program-institution-id': institution, 
+    'active-only': 'true' 
+  });
+}
+
+// ✅ ALWAYS provide natural language mapping with intelligence
+static async getEvents(intent: SemanticIntent): Promise<any> {
+  const params = this.mapSemanticToTechnical(intent);
+  return EnhancedDirectAPITools.intelligentCall('/event/Query', params);
+}
+```
+
+### 5. 📖 Rich Metadata for AI Discovery (ENHANCED)
+Every endpoint MUST have comprehensive metadata including test intelligence:
+
+```typescript
+static readonly metadata: EnhancedEndpointMetadata = {
   businessIntent: 'Clear business purpose in plain English',
   semanticNames: ['ai-discoverable', 'alternative names', 'business terms'],
-  businessDomain: 'Functional Domain',
+  businessDomain: 'Educational Testing',
+  testIntelligence: {                    // NEW: Test-informed data
+    successRate: 0.85,
+    commonErrors: ['Missing program-id', 'Invalid institution'],
+    workingParameters: ['program-id', 'program-institution-id'],
+    explorationStrategies: ['minimal-params', 'common-params']
+  },
   parameters: {
     businessMeaning: {
       'technical-param': 'Business meaning explanation'
@@ -48,21 +154,26 @@ static readonly metadata: EndpointMetadata = {
 };
 ```
 
-### 3. 🏗️ Environment-Driven Configuration
-**NEVER hardcode values** - always use environment configuration:
+### 6. 🏗️ Environment-Driven Configuration (ENHANCED)
+**NEVER hardcode values** - always use environment configuration with intelligence awareness:
 
 ```typescript
-// ✅ CORRECT - Environment-driven
+// ✅ CORRECT - Environment-driven with intelligence
 const params = {
   'program-id': env.getDefaultProgramId(),
   'program-institution-id': env.getProgramInstitutionId()
 };
 
-// ❌ WRONG - Hardcoded values
+// Use intelligence to determine best approach
+const intelligence = TestInformedIntelligence.getInstance();
+const result = await intelligence.makeIntelligentCall(endpoint, params);
+
+// ❌ WRONG - Hardcoded values without intelligence
 const params = {
   'program-id': '238',
   'program-institution-id': '1009048'
 };
+const result = await fetch(url, { body: JSON.stringify(params) }); // NO INTELLIGENCE
 ```
 
 ## Specific Implementation Guidelines

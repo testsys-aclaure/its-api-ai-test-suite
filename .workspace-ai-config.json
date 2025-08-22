@@ -1,0 +1,77 @@
+{
+  "name": "Educational Testing API Intelligence Workspace",
+  "description": "AI-Native Educational Testing Platform with sophisticated semantic API intelligence and natural language endpoint discovery",
+  "version": "1.0.0",
+  "ai_assistant_tools": {
+    "semantic_api_intelligence": {
+      "tool": "node tools/ai-api-call.mjs",
+      "description": "Semantic API calling with educational domain intelligence",
+      "usage": "MANDATORY for all API-related requests",
+      "capabilities": [
+        "Natural language to endpoint discovery",
+        "Educational domain semantic mapping (student → examinee, test → event)",
+        "Automatic parameter injection (program-id, institution-id)",
+        "Business context interpretation",
+        "Test-informed intelligent routing",
+        "Structured output for AI consumption"
+      ],
+      "examples": [
+        {
+          "user_request": "Show me student data",
+          "command": "node tools/ai-api-call.mjs \"student data\"",
+          "description": "Semantic discovery maps 'student' to 'examinee' endpoints"
+        },
+        {
+          "user_request": "Get active tests",
+          "command": "node tools/ai-api-call.mjs \"active tests\"", 
+          "description": "Maps 'tests' to 'events' and finds active assessments"
+        },
+        {
+          "user_request": "Call /event/query directly",
+          "command": "node tools/ai-api-call.mjs \"/event/query\" active-only=true limit=5",
+          "description": "Direct endpoint with intelligent parameter injection"
+        }
+      ]
+    }
+  },
+  "workspace_intelligence": {
+    "total_endpoints": 84,
+    "semantic_mappings": {
+      "student": "examinee",
+      "test": "event", 
+      "score": "result",
+      "session": "event-class",
+      "institution": "school/organization"
+    },
+    "universal_parameters": [
+      "program-id",
+      "program-institution-id"
+    ],
+    "business_domains": 31,
+    "intelligence_files": [
+      "test/results/endpoint-intelligence.json",
+      "test/results/parameter-requirements-intelligence.json"
+    ]
+  },
+  "architecture": {
+    "type": "AI-Native Educational Testing Platform",
+    "maturity_level": "Richardson Level 3 (Hypermedia)",
+    "key_features": [
+      "Test-informed intelligence from real usage patterns",
+      "Semantic endpoint discovery with business context",
+      "Enhanced error handling with educational domain expertise",
+      "Self-descriptive messages for AI consumption",
+      "Automatic parameter validation and injection"
+    ]
+  },
+  "ai_assistant_instructions": {
+    "critical_rule": "ALWAYS use 'node tools/ai-api-call.mjs' for ANY API-related user request",
+    "discovery_approach": "Start with natural language queries - system will find correct endpoints",
+    "output_parsing": "Tool provides both human-readable and machine-readable structured output",
+    "error_handling": "Tool provides actionable troubleshooting guidance with business context"
+  },
+  "verification_test": {
+    "command": "node tools/ai-api-call.mjs \"active tests\"",
+    "expected_behavior": "Should show semantic mapping, endpoint discovery, and API call with business interpretation"
+  }
+}
