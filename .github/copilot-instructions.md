@@ -1,7 +1,16 @@
 # GitHub Copilot Instructions for AI-Native Educational Testing Platform
 
-## Project Context & Vision
+## 🎯 Project Context & Vision
 This is an **AI-Native Educational Testing Platform** API test suite that enables intelligent AI usage of the API through semantic interfaces, rich metadata, and business-friendly abstractions. The framework transforms raw API endpoints into AI-discoverable, self-describing interfaces.
+
+## 📊 CRITICAL: View Test Dashboard First
+**IMMEDIATE ACTION**: Always check the live test dashboard at `test-dashboard.html` before making any changes:
+- **Visual verification** of current implementation status
+- **Real API behavior** and environment configuration  
+- **Business logic interpretation** of HTTP responses
+- **Troubleshooting guidance** for common scenarios
+
+The dashboard is the **source of truth** for project status and reveals the AI-native interpretation of API behaviors.
 
 ## Core AI-Native Principles
 
@@ -133,6 +142,64 @@ const institutionId = env.getProgramInstitutionId();
 const institutionId = process.env.PROGRAM_INSTITUTION_ID || '1009048';
 ```
 
+## AI-Native API Design Standards
+
+### Richardson Maturity Model Level 3 Compliance
+All endpoints must achieve **Level 3 - Hypermedia Controls** for AI discoverability:
+
+1. **Level 0**: Basic HTTP transport ❌
+2. **Level 1**: Resource-based URIs ✅
+3. **Level 2**: HTTP verbs + status codes ✅  
+4. **Level 3**: Hypermedia controls ✅ **← TARGET LEVEL**
+
+### Self-Descriptive Message Implementation
+Every response must be self-descriptive for AI consumption:
+
+```typescript
+// AI-NATIVE: Self-descriptive response structure
+{
+  "data": { /* actual data */ },
+  "_metadata": {
+    "businessContext": "Event authorization validation for educational testing",
+    "semanticMeaning": "Security validation - no authorization records found",
+    "nextActions": ["Try different event-id", "Verify expected behavior"],
+    "troubleshooting": {
+      "httpStatus": 422,
+      "businessReason": "Event has no authorization requirements in test institution",
+      "isErrorCondition": false,
+      "expectedBehavior": true
+    }
+  },
+  "_links": {
+    "self": { "href": "/event/authorizations/query?..." },
+    "related": [
+      { "rel": "events", "href": "/event/query" },
+      { "rel": "documentation", "href": "/docs/event-authorization" }
+    ]
+  }
+}
+```
+
+### Uniform Interface Principles
+Implement consistent patterns across all endpoints:
+
+```typescript
+// AI-NATIVE: Uniform interface pattern
+export interface AIEndpointInterface {
+  // 1. Resource identification through URIs
+  readonly resourceURI: string;
+  
+  // 2. Resource manipulation through representations
+  execute(params: APIParameters): Promise<ResourceRepresentation>;
+  
+  // 3. Self-descriptive messages
+  readonly metadata: SelfDescriptiveMetadata;
+  
+  // 4. Hypermedia as engine of application state
+  getHypermediaControls(context: any): HypermediaLinks;
+}
+```
+
 ## AI-Friendly Code Practices
 
 ### 1. Descriptive Naming
@@ -174,7 +241,65 @@ const parameterMapping = {
 };
 ```
 
+### 4. Hypermedia-Driven Design
+Following **Richardson Maturity Model Level 3**, provide discovery mechanisms:
+
+```typescript
+// AI-NATIVE: Include navigational links in responses
+static async execute(params: APIParameters): Promise<any> {
+  const result = await this.makeAPICall(params);
+  
+  // Add hypermedia controls for AI discovery
+  if (result.success) {
+    result._links = {
+      self: { href: this.getSelfLink(params) },
+      related: this.getRelatedEndpoints(),
+      documentation: { href: `${this.metadata.businessDomain}/docs` }
+    };
+  }
+  return result;
+}
+```
+
+### 5. Machine-Readable Metadata
+Provide structured metadata that AI agents can consume:
+
+```typescript
+// AI-NATIVE: Machine-readable capability description
+static readonly capabilities = {
+  discoverability: {
+    semanticSearch: true,
+    businessIntent: this.metadata.businessIntent,
+    domainContext: this.metadata.businessDomain
+  },
+  interoperability: {
+    standardsCompliance: ['REST Level 3', 'HATEOAS', 'Self-descriptive'],
+    mediaTypes: ['application/json', 'application/hal+json']
+  },
+  usability: {
+    naturalLanguageAccess: true,
+    businessAliases: Object.keys(this.businessMethods),
+    troubleshootingGuidance: true
+  }
+};
+```
+
 ## Dashboard & Reporting Guidelines
+
+### Central Dashboard Architecture
+The **HTML test dashboard** (`test-dashboard.html`) is the **primary interface** for understanding project status:
+
+```bash
+# Quick dashboard access
+npm run dashboard     # Run tests + open dashboard
+start test-dashboard.html  # Direct access (Windows)
+```
+
+### Dashboard Intelligence Features
+- **Environment transparency** - Shows actual API URLs and parameters being used
+- **Business logic interpretation** - Explains HTTP 422 as "Security validation working"
+- **AI-native metrics** - Semantic interface coverage, metadata completeness
+- **Actionable troubleshooting** - Specific guidance for each endpoint scenario
 
 ### Environment-Driven Reporting
 Dashboard must reflect actual API calls, not assumptions:
@@ -189,6 +314,13 @@ if (!baseUrl || !programId) {
   return '⚠️ Environment not configured - cannot display actual API requests';
 }
 ```
+
+### AI-Native Reporting Standards
+Follow **Richardson Maturity Model Level 3** principles in dashboard design:
+- **Self-descriptive messages** - Each endpoint result explains itself
+- **Hypermedia controls** - Dashboard provides links to next actions
+- **Semantic richness** - Business context for every technical response
+- **Discovery mechanisms** - Help AI agents understand available operations
 
 ### Troubleshooting Context
 Provide AI agents with actionable troubleshooting information:
@@ -205,6 +337,7 @@ troubleshooting: {
 ## Code Review Checklist
 
 When reviewing code, ensure:
+- [ ] **Dashboard consulted first** - Verify current state before making changes
 - [ ] **Semantic interfaces** provided for AI discovery
 - [ ] **Rich metadata** with business context
 - [ ] **Environment configuration** used (no hardcoding)
@@ -237,6 +370,87 @@ const authorization = await EventAuthorizationQuery.checkStudentAccess({
 ```
 
 This framework transforms your API from technical documentation into **intelligent interfaces that AI agents can discover, understand, and use effectively** for educational testing workflows.
+
+## AI Usability Enforcement Standards
+
+### 1. **HATEOAS (Hypertext as Engine of Application State)**
+All endpoints must implement hypermedia controls for AI navigation:
+
+```typescript
+// MANDATORY: Include navigational controls in every response
+{
+  "data": { /* response data */ },
+  "_links": {
+    "self": { "href": "current-resource-uri" },
+    "next": { "href": "next-logical-action" },
+    "related": [
+      { "rel": "parent", "href": "/parent-resource" },
+      { "rel": "children", "href": "/child-resources" }
+    ],
+    "actions": {
+      "update": { "href": "/resource", "method": "PUT" },
+      "delete": { "href": "/resource", "method": "DELETE" }
+    }
+  }
+}
+```
+
+### 2. **Content Negotiation for AI Agents**
+Support multiple representation formats:
+
+```typescript
+// AI-NATIVE: Support multiple formats for different AI agents
+static async execute(params: APIParameters, accept = 'application/json'): Promise<any> {
+  const result = await this.makeAPICall(params);
+  
+  switch (accept) {
+    case 'application/hal+json':
+      return this.formatAsHAL(result);
+    case 'application/vnd.api+json':
+      return this.formatAsJSONAPI(result);
+    case 'application/json':
+    default:
+      return this.formatWithMetadata(result);
+  }
+}
+```
+
+### 3. **Uniform Resource Identification**
+Consistent URI patterns that AI agents can predict:
+
+```typescript
+// AI-NATIVE: Predictable URI patterns
+static readonly resourcePatterns = {
+  collection: '/resources',
+  item: '/resources/{id}',
+  subCollection: '/resources/{id}/sub-resources',
+  action: '/resources/{id}/actions/{action-name}'
+};
+```
+
+### 4. **Machine-Readable Error Context**
+HTTP errors with business context for AI troubleshooting:
+
+```typescript
+// AI-NATIVE: Enhanced error responses
+{
+  "error": {
+    "httpStatus": 422,
+    "code": "VALIDATION_FAILED",
+    "title": "Business Logic Validation Failed",
+    "detail": "Event has no authorization requirements in test institution",
+    "businessContext": {
+      "domain": "Security Validation",
+      "expectedBehavior": true,
+      "nextSteps": ["Try different event-id", "Verify test data setup"]
+    }
+  },
+  "_links": {
+    "help": { "href": "/docs/troubleshooting/validation-errors" },
+    "retry": { "href": "/event/authorizations/query", "method": "GET" }
+  }
+}
+```
 
 ## Key Success Metrics
 - AI agents can discover endpoints by business intent
