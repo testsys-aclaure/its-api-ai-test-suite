@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "openapi-tools": {
+      "command": "npm",
+      "args": ["run", "--silent", "start:mcp"],
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "API_BASE_URL": "${env:API_BASE_URL}",
+        "API_BEARER_TOKEN": "${env:API_BEARER_TOKEN}",
+        "FORCE_COLOR": "0",
+        "CI": "1",
+        "NODE_NO_READLINE": "1"
+      }
+    }
+  }
+}
