@@ -1,4 +1,11 @@
 {
+  "inputs": [
+    {
+      "id": "ado_org",
+      "type": "promptString",
+      "description": "itsdevelopment"
+    }
+  ],
   "servers": {
     "openapi-tools": {
       "command": "npm",
@@ -11,6 +18,11 @@
         "CI": "1",
         "NODE_NO_READLINE": "1"
       }
+    },
+    "ado": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@azure-devops/mcp", "${input:ado_org}"]
     }
   }
 }

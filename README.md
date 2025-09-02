@@ -102,3 +102,5 @@ Use these steps to confirm the MCP server is discovered and can call the API.
 - If the OpenAPI security scheme has a name (e.g., `Default`), you can define `OAUTH_*_DEFAULT` to scope credentials/token URL for that scheme. Re-run the tool and check logs.
 
 If you want a scripted, non-Chat smoke test later, we can add a tiny Node client that spawns the server and calls `listTools` + one tool over MCP stdio.
+
+**TO USE INSPECTOR: npx @modelcontextprotocol/inspector node src/generated/index.ts**

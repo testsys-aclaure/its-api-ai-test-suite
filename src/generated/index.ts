@@ -1,4 +1,43 @@
 #!/usr/bin/env node
+// --- MCP 401 Triage Helpers ---
+import * as fs from 'fs';
+import * as path from 'path';
+// Helper to decode JWT (header/payload only, no signature)
+function decodeJwtPart(token: string, part: 'header' | 'payload'): any {
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    const b64 = parts[part === 'header' ? 0 : 1];
+    return JSON.parse(Buffer.from(b64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
+  } catch (e) { return null; }
+}
+// Helper to load env files in order and track provenance
+function loadEnvWithProvenance() {
+  const envFiles = ['.env.local', '.env', path.join('.vscode', 'env', '.env.qa')];
+  const env: { [key: string]: string } = {};
+  const provenance: { [key: string]: string } = {};
+  for (const file of envFiles) {
+    try {
+      const abs = path.resolve(process.cwd(), file);
+      if (fs.existsSync(abs)) {
+        const lines = fs.readFileSync(abs, 'utf8').split(/\r?\n/);
+        for (const line of lines) {
+          const m = line.match(/^([A-Za-z0-9_]+)=(.*)$/);
+          if (m) {
+            const k = m[1];
+            let v = m[2].trim();
+            if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
+            if (!(k in env)) {
+              env[k] = v;
+              provenance[k] = file;
+            }
+          }
+        }
+      }
+    } catch (e) {}
+  }
+  return { env, provenance };
+}
 /**
  * MCP Server generated from OpenAPI spec for its-public-web-api v1.0.0
  * Generated on: 2025-08-22T14:25:33.575Z
@@ -48,6 +87,16 @@ export const SERVER_NAME = "its-public-web-api";
 export const SERVER_VERSION = "1.0.0";
 export const API_BASE_URL = process.env.API_BASE_URL || "https://api-staging.testsys.io";
 
+// Always define the Default security scheme as HTTP Bearer
+const securitySchemes = {
+  Default: {
+    type: "http",
+    description: "Bearer Token",
+    scheme: "bearer",
+    bearerFormat: "JWT"
+  }
+};
+
 /**
  * Ensure a Bearer token is available. If API_BEARER_TOKEN is not set,
  * try to acquire one using OAuth2 client-credentials variables from env.
@@ -61,11 +110,7 @@ export const API_BASE_URL = process.env.API_BASE_URL || "https://api-staging.tes
  */
 async function ensureBearerToken(): Promise<void> {
   try {
-    if (process.env.API_BEARER_TOKEN && process.env.API_BEARER_TOKEN.trim() !== '') {
-      console.error("Using API_BEARER_TOKEN from environment");
-      return;
-    }
-
+    // Always acquire a new token, ignore any API_BEARER_TOKEN in env
     const tokenUrl = process.env.OAUTH_TOKEN_URL;
     const clientId = process.env.OAUTH_CLIENT_ID;
     const clientSecret = process.env.OAUTH_CLIENT_SECRET;
@@ -73,7 +118,7 @@ async function ensureBearerToken(): Promise<void> {
     const audience = process.env.OAUTH_AUDIENCE;
 
     if (!tokenUrl || !clientId || !clientSecret) {
-      console.error("No API_BEARER_TOKEN present and missing OAUTH_* env (OAUTH_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET). Skipping auto token fetch.");
+      console.error("Missing OAUTH_* env (OAUTH_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET). Skipping auto token fetch.");
       return;
     }
 
@@ -111,8 +156,8 @@ async function ensureBearerToken(): Promise<void> {
  * MCP Server instance
  */
 const server = new Server(
-    { name: SERVER_NAME, version: SERVER_VERSION },
-    { capabilities: { tools: {} } }
+  { name: SERVER_NAME, version: SERVER_VERSION },
+  { capabilities: { tools: {} } }
 );
 
 /**
@@ -153,7 +198,7 @@ const toolDefinitionMap: Map<string, McpToolDefinition> = new Map([
   ["EventAuthorizationQuery", {
     name: "EventAuthorizationQuery",
     description: `This method queries event-specific authorization codes. The event must have previously been created, and the user querying must have access. If an authorization code has been used, then result information is also returned.`,
-    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"string","description":"The unique program identifier of an institution. If supplied, all events linked to this institution or its children will be returned. The web API client must have access to this institution."},"event-id":{"type":"number","format":"int64","description":"The unique database identifier of the event. If not supplied, `event-description` is required."},"event-description":{"type":"string","description":"The unique textual identifier of the event. If not supplied, `event-id` is required."},"limit":{"maximum":500,"minimum":1,"type":"number","format":"int32","default":500,"description":"The number of event-authorization objects to return. By default, this call returns a maximum of 500 objects. The limit can be set to any number less than 500."},"before-id":{"type":"number","format":"int64","default":9223372036854776000,"description":"A specific `authorization-id`. The API returns objects with `authorization-id`s that precede `before-id`. This parameter cannot be used if `after-id` is used."},"after-id":{"type":"number","format":"int64","description":"A specific `authorization-id`. The API returns objects with `authorization-id`s that follow `after-id`. This parameter cannot be used if `before-id` is used."}},"required":["program-id"]},
+    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"string","description":"The unique program identifier of an institution. If supplied, all events linked to this institution or its children will be returned. The web API client must have access to this institution."},"event-id":{"type":"number","format":"int64","description":"The unique database identifier of the event. If not supplied, `event-description` is required."},"event-description":{"type":"string","description":"The unique textual identifier of the event. If not supplied, `event-id` is required."},"limit":{"maximum":500,"minimum":1,"type":"number","format":"int32","default":500,"description":"The number of event-authorization objects to return. By default, this call returns a maximum of 500 objects. The limit can be set to any number less than 500."},"before-id":{"type":"number","format":"int64","default":10000,"description":"A specific `authorization-id`. The API returns objects with `authorization-id`s that precede `before-id`. This parameter cannot be used if `after-id` is used."},"after-id":{"type":"number","format":"int64","description":"A specific `authorization-id`. The API returns objects with `authorization-id`s that follow `after-id`. This parameter cannot be used if `before-id` is used."}},"required":["program-id"]},
     method: "get",
     pathTemplate: "/event/authorizations/Query",
     executionParameters: [{"name":"program-id","in":"query"},{"name":"program-institution-id","in":"query"},{"name":"event-id","in":"query"},{"name":"event-description","in":"query"},{"name":"limit","in":"query"},{"name":"before-id","in":"query"},{"name":"after-id","in":"query"}],
@@ -333,7 +378,7 @@ const toolDefinitionMap: Map<string, McpToolDefinition> = new Map([
   ["ExamineeQuery", {
     name: "ExamineeQuery",
     description: `Retrieves details about examinees in a program.`,
-    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"array","items":{"type":"string"},"description":"The unique program identifier of an institution. The API matches examinees linked to this institution and the institution's children. The web API client must have access to this institution."},"examinee-id":{"type":"array","items":{"type":"number","format":"int64"},"description":"The unique ITS database identifier of the examinee. Use a comma-separated list to query on multiple examinees."},"program-examinee-system-id":{"type":"array","items":{"type":"string"},"description":"The program's system identifier of the examinee. Use a comma-separated list to query on multiple examinees."},"program-examinee-public-id":{"type":"array","items":{"type":"string"},"description":"The program's public or business identifier of the examinee. Use a comma-separated list to query on multiple examinees."},"return-fields":{"maximum":2,"minimum":0,"type":"number","format":"int32"},"include-flag":{"maximum":4095,"minimum":0,"type":"number","format":"int64","description":"Bit flag for any information you wish to include in the examinee object. If neither `include-flag` or `exclude-flag` are returned, all information is included. This parameter cannot be used if the exclude-flag parameter is used. Example: To include profile, address, and institution information, use 1096 to represent 8 + 64 + 1024. Bit Information\r\n\r\n| Bit Flag                            | Bit Value |\r\n|-------------------------------------|-----------|\r\n| 1 = Examinee status                 | 1         |\r\n| 2 = Enrollment status               | 2         |\r\n| 3 = Login information               | 4         |\r\n| 4 = Profile information             | 8         |\r\n| 5 = Examinee photo                  | 16        |\r\n| 6 = Contact information             | 32        |\r\n| 7 = Address                         | 64        |\r\n| 8 = Job information                 | 218       |\r\n| 9 = Program specific properties     | 256       |\r\n| 10 = Delivery options and overrides | 512       |\r\n| 11 = Institutions                   | 1024      |\r\n| 12 = Certifications                 | 2048      |"},"exclude-flag":{"maximum":4095,"minimum":0,"type":"number","format":"int64","description":"Bit flag for any information you wish to exclude from the examinee object. This parameter cannot be used if the `include-flag` parameter is used. See the `include-flag` parameter for a list of supported bits."},"limit":{"maximum":500,"minimum":1,"type":"number","format":"int32","default":500,"description":"The number of examinee objects to return. By default, this call returns a maximum of 500 objects. The limit can be set to any number less than 500."},"before-id":{"type":"number","format":"int64","default":9223372036854776000,"description":"A specific `examinee-id`. The API returns objects with `examinee-id`s that precede `before-id`. This parameter cannot be used if `after-id` is used."},"after-id":{"type":"number","format":"int64","description":"A specific `examinee-id`. The API returns objects with `examinee-id`s that follow `after-id`. This parameter cannot be used if `before-id` is used."}},"required":["program-id"]},
+    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"array","items":{"type":"string"},"description":"The unique program identifier of an institution. The API matches examinees linked to this institution and the institution's children. The web API client must have access to this institution."},"examinee-id":{"type":"array","items":{"type":"number","format":"int64"},"description":"The unique ITS database identifier of the examinee. Use a comma-separated list to query on multiple examinees."},"program-examinee-system-id":{"type":"array","items":{"type":"string"},"description":"The program's system identifier of the examinee. Use a comma-separated list to query on multiple examinees."},"program-examinee-public-id":{"type":"array","items":{"type":"string"},"description":"The program's public or business identifier of the examinee. Use a comma-separated list to query on multiple examinees."},"return-fields":{"maximum":2,"minimum":0,"type":"number","format":"int32"},"include-flag":{"maximum":4095,"minimum":0,"type":"number","format":"int64","description":"Bit flag for any information you wish to include in the examinee object. If neither `include-flag` or `exclude-flag` are returned, all information is included. This parameter cannot be used if the exclude-flag parameter is used. Example: To include profile, address, and institution information, use 1096 to represent 8 + 64 + 1024. Bit Information\r\n\r\n| Bit Flag                            | Bit Value |\r\n|-------------------------------------|-----------|\r\n| 1 = Examinee status                 | 1         |\r\n| 2 = Enrollment status               | 2         |\r\n| 3 = Login information               | 4         |\r\n| 4 = Profile information             | 8         |\r\n| 5 = Examinee photo                  | 16        |\r\n| 6 = Contact information             | 32        |\r\n| 7 = Address                         | 64        |\r\n| 8 = Job information                 | 218       |\r\n| 9 = Program specific properties     | 256       |\r\n| 10 = Delivery options and overrides | 512       |\r\n| 11 = Institutions                   | 1024      |\r\n| 12 = Certifications                 | 2048      |"},"exclude-flag":{"maximum":4095,"minimum":0,"type":"number","format":"int64","description":"Bit flag for any information you wish to exclude from the examinee object. This parameter cannot be used if the `include-flag` parameter is used. See the `include-flag` parameter for a list of supported bits."},"limit":{"maximum":500,"minimum":1,"type":"number","format":"int32","default":500,"description":"The number of examinee objects to return. By default, this call returns a maximum of 500 objects. The limit can be set to any number less than 500."},"before-id":{"type":"number","format":"int64","default":10000,"description":"A specific `examinee-id`. The API returns objects with `examinee-id`s that precede `before-id`. This parameter cannot be used if `after-id` is used."},"after-id":{"type":"number","format":"int64","description":"A specific `examinee-id`. The API returns objects with `examinee-id`s that follow `after-id`. This parameter cannot be used if `before-id` is used."}},"required":["program-id"]},
     method: "get",
     pathTemplate: "/examinee/query",
     executionParameters: [{"name":"program-id","in":"query"},{"name":"program-institution-id","in":"query"},{"name":"examinee-id","in":"query"},{"name":"program-examinee-system-id","in":"query"},{"name":"program-examinee-public-id","in":"query"},{"name":"return-fields","in":"query"},{"name":"include-flag","in":"query"},{"name":"exclude-flag","in":"query"},{"name":"limit","in":"query"},{"name":"before-id","in":"query"},{"name":"after-id","in":"query"}],
@@ -550,10 +595,10 @@ const toolDefinitionMap: Map<string, McpToolDefinition> = new Map([
     requestBodyContentType: undefined,
     securityRequirements: [{"Default":[]}]
   }],
-  ["ExamineeQuery1", {
-    name: "ExamineeQuery1",
+  ["MessageHistoryQuery", {
+    name: "MessageHistoryQuery",
     description: `Endpoint for querying message history`,
-    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The program's unique identifier"},"examinee-id":{"type":"number","format":"int64","description":"The unique ITS database identifier of the examinee."},"program-examinee-system-id":{"type":"string","description":"The program’s system identifier of the examinee."},"program-examinee-public-id":{"type":"string","description":"The program’s public or business identifier of the examinee. "},"start-utc":{"type":"string","format":"date-time","description":"The start date >= of the CreateUTC field of the message record."},"end-utc":{"type":"string","format":"date-time","description":"The end date <= of the CreateUTC field of the message record."},"before-id":{"type":"number","format":"int64","default":9223372036854776000,"description":"Before ID for message history"},"after-id":{"type":"number","format":"int64","description":"After ID for message history"},"limit":{"type":"number","format":"int64","default":1000,"description":"Limit of the number of messages returned"}}},
+    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The program's unique identifier"},"examinee-id":{"type":"number","format":"int64","description":"The unique ITS database identifier of the examinee."},"program-examinee-system-id":{"type":"string","description":"The program’s system identifier of the examinee."},"program-examinee-public-id":{"type":"string","description":"The program’s public or business identifier of the examinee. "},"start-utc":{"type":"string","format":"date-time","description":"The start date >= of the CreateUTC field of the message record."},"end-utc":{"type":"string","format":"date-time","description":"The end date <= of the CreateUTC field of the message record."},"before-id":{"type":"number","format":"int64","default":10000,"description":"Before ID for message history"},"after-id":{"type":"number","format":"int64","description":"After ID for message history"},"limit":{"type":"number","format":"int64","default":1000,"description":"Limit of the number of messages returned"}}},
     method: "get",
     pathTemplate: "/message-history/query",
     executionParameters: [{"name":"program-id","in":"query"},{"name":"examinee-id","in":"query"},{"name":"program-examinee-system-id","in":"query"},{"name":"program-examinee-public-id","in":"query"},{"name":"start-utc","in":"query"},{"name":"end-utc","in":"query"},{"name":"before-id","in":"query"},{"name":"after-id","in":"query"},{"name":"limit","in":"query"}],
@@ -673,7 +718,7 @@ const toolDefinitionMap: Map<string, McpToolDefinition> = new Map([
   ["GetRemotePracticeChecksQuery", {
     name: "GetRemotePracticeChecksQuery",
     description: `Retrieves details about a practice check.`,
-    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"string","description":"The unique program identifier of an institution. Sessions are linked to this institution. The web API client must have access to this institution."},"ip-address":{"type":"string","description":"If supplied, the API will return all system checks that originated from this ip-address.  You can request three octets or four octets.  If three octets are requested, the API will return all system checks where the first three octets of the system check ip address matches this ip-address."},"program-examinee-public-id":{"type":"string","description":"The program�s public or business identifier of the examinee."},"start-utc":{"type":"string","format":"date-time","description":"Includes all checks completed on or after this date."},"end-utc":{"type":"string","format":"date-time","description":"Includes all checks completed before this date."},"program-registration-id":{"type":"string","description":"The program’s unique identifier for the registration."},"limit":{"maximum":100,"minimum":1,"type":"number","format":"int32","default":100,"description":"The number of `remote-system-check` objects to return. By default, this call returns a maximum of 100 objects. The limit can be set to any number less than 100."},"before-id":{"type":"number","format":"int64","default":9223372036854776000,"description":"A specific `practice-check-id`. The API returns objects with system-check-ids that precede before-id. This parameter cannot be used if after-id is used."},"after-id":{"type":"number","format":"int64","description":"A specific `practice-check-id`. The API returns objects with system-check-ids that follow after-id. This parameter cannot be used if before-id is used."}},"required":["program-id"]},
+    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"string","description":"The unique program identifier of an institution. Sessions are linked to this institution. The web API client must have access to this institution."},"ip-address":{"type":"string","description":"If supplied, the API will return all system checks that originated from this ip-address.  You can request three octets or four octets.  If three octets are requested, the API will return all system checks where the first three octets of the system check ip address matches this ip-address."},"program-examinee-public-id":{"type":"string","description":"The program�s public or business identifier of the examinee."},"start-utc":{"type":"string","format":"date-time","description":"Includes all checks completed on or after this date."},"end-utc":{"type":"string","format":"date-time","description":"Includes all checks completed before this date."},"program-registration-id":{"type":"string","description":"The program’s unique identifier for the registration."},"limit":{"maximum":100,"minimum":1,"type":"number","format":"int32","default":100,"description":"The number of `remote-system-check` objects to return. By default, this call returns a maximum of 100 objects. The limit can be set to any number less than 100."},"before-id":{"type":"number","format":"int64","default":10000,"description":"A specific `practice-check-id`. The API returns objects with system-check-ids that precede before-id. This parameter cannot be used if after-id is used."},"after-id":{"type":"number","format":"int64","description":"A specific `practice-check-id`. The API returns objects with system-check-ids that follow after-id. This parameter cannot be used if before-id is used."}},"required":["program-id"]},
     method: "get",
     pathTemplate: "/remote/practice-checks/Query",
     executionParameters: [{"name":"program-id","in":"query"},{"name":"program-institution-id","in":"query"},{"name":"ip-address","in":"query"},{"name":"program-examinee-public-id","in":"query"},{"name":"start-utc","in":"query"},{"name":"end-utc","in":"query"},{"name":"program-registration-id","in":"query"},{"name":"limit","in":"query"},{"name":"before-id","in":"query"},{"name":"after-id","in":"query"}],
@@ -733,7 +778,7 @@ const toolDefinitionMap: Map<string, McpToolDefinition> = new Map([
   ["GetRemoteSystemChecksQuery", {
     name: "GetRemoteSystemChecksQuery",
     description: `Retrieves details about a remote system check.`,
-    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"ip-address":{"type":"array","items":{"type":"string"},"description":"If supplied, the API will return all system checks that originated from this ip-address. You can request three octets or four octets. If three octets are requested, the API will return all system checks where the first three octets of the system check ip address matches this ip-address."},"start-utc":{"type":"string","format":"date-time","description":"Includes all checks completed on or after this date."},"end-utc":{"type":"string","format":"date-time","description":"Includes all checks completed before this date."},"limit":{"maximum":100,"minimum":1,"type":"number","format":"int32","default":100,"description":"Includes all checks completed before this date."},"before-id":{"type":"number","format":"int64","default":9223372036854776000,"description":"A specific system-check-id. The API returns objects with  system-check-ids that precede before-id. This parameter cannot be used if after-id is used."},"after-id":{"type":"number","format":"int64","description":"A specific system-check-id. The API returns objects with system-check-ids that follow after-id. This parameter cannot be used if before-id is used."}},"required":["program-id"]},
+    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"ip-address":{"type":"array","items":{"type":"string"},"description":"If supplied, the API will return all system checks that originated from this ip-address. You can request three octets or four octets. If three octets are requested, the API will return all system checks where the first three octets of the system check ip address matches this ip-address."},"start-utc":{"type":"string","format":"date-time","description":"Includes all checks completed on or after this date."},"end-utc":{"type":"string","format":"date-time","description":"Includes all checks completed before this date."},"limit":{"maximum":100,"minimum":1,"type":"number","format":"int32","default":100,"description":"Includes all checks completed before this date."},"before-id":{"type":"number","format":"int64","default":10000,"description":"A specific system-check-id. The API returns objects with  system-check-ids that precede before-id. This parameter cannot be used if after-id is used."},"after-id":{"type":"number","format":"int64","description":"A specific system-check-id. The API returns objects with system-check-ids that follow after-id. This parameter cannot be used if before-id is used."}},"required":["program-id"]},
     method: "get",
     pathTemplate: "/remote/system-checks/Query",
     executionParameters: [{"name":"program-id","in":"query"},{"name":"ip-address","in":"query"},{"name":"start-utc","in":"query"},{"name":"end-utc","in":"query"},{"name":"limit","in":"query"},{"name":"before-id","in":"query"},{"name":"after-id","in":"query"}],
@@ -903,7 +948,7 @@ const toolDefinitionMap: Map<string, McpToolDefinition> = new Map([
   ["TestQuery", {
     name: "TestQuery",
     description: `Gets test query result object according to test object spec.`,
-    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"string","description":"The unique program identifier of an institution. Sessions are linked to this institution. The web API client must have access to this institution."},"test-name":{"type":"array","items":{"type":"string"},"description":"The unique textual identifier of the test. Multiple Supported"},"test-id":{"type":"array","items":{"type":"number","format":"int64"},"description":"The unique database identifier of the test. Multiple Supported"},"include-inactive":{"type":"boolean","default":false,"description":"A flag indicating whether inactive tests should be returned"},"include-demo":{"type":"boolean","default":false,"description":"A flag indicating whether demo tests should be returned"},"last-modified-utc":{"type":"string","format":"date-time","description":"The UTC date/time to find all new or updated tests since that date/time."},"limit":{"maximum":1000,"minimum":1,"type":"number","format":"int32","default":1000,"description":"The number of test objects to return. By default, this call will return a maximum of 1000 test objects. The limit can be set to any number less than 1000."},"before-id":{"type":"number","format":"int64","default":9223372036854776000,"description":"The test-id is the pagination ID used for this resource. Test-id objects with IDs immediately before this ID are returned. This parameter cannot be used if after-id is used."},"after-id":{"type":"number","format":"int64","description":"The test-id is the pagination ID used for this resource. Test objects with IDs immediately after this ID are returned. This parameter cannot be used if before-id is used."},"include-flag":{"type":"number","format":"int64","description":"Bit flag for any information you wish to include in the test object. If include-flag is not requested, all information is included. \r\nExample: To include general form information and informational meta data, use 65 to represent 1+ 64.\r\n**Bit Information**\r\n\r\n| Bit Flag                     | Bit Value |\r\n|------------------------------|-----------|\r\n| 1 = General Test Information | 1         |\r\n| 2 = Test Type                | 2         |\r\n| 3 = Audits                   | 4         |\r\n| 4 = Form Selection           | 8         |\r\n| 5 = Attempts                 | 16        |\r\n| 6 = Academic Models          | 32        |\r\n| 7 = Live in Application      | 64        |\r\n| 8 = Reporting & Exporting    | 128       |\r\n| 9 = Test Categories & Groups | 256       |\r\n| 10 = Start Test              | 512       |\r\n| 11 = Automatic Close         | 1024      |\r\n| 12 = Continuous Learning     | 2048      |\r\n| 13 = Observational           | 4096      |\r\n"}},"required":["program-id"]},
+    inputSchema: {"type":"object","properties":{"program-id":{"type":"number","format":"int64","description":"The unique program identifier provided as part of configuration."},"program-institution-id":{"type":"string","description":"The unique program identifier of an institution. Sessions are linked to this institution. The web API client must have access to this institution."},"test-name":{"type":"array","items":{"type":"string"},"description":"The unique textual identifier of the test. Multiple Supported"},"test-id":{"type":"array","items":{"type":"number","format":"int64"},"description":"The unique database identifier of the test. Multiple Supported"},"include-inactive":{"type":"boolean","default":false,"description":"A flag indicating whether inactive tests should be returned"},"include-demo":{"type":"boolean","default":false,"description":"A flag indicating whether demo tests should be returned"},"last-modified-utc":{"type":"string","format":"date-time","description":"The UTC date/time to find all new or updated tests since that date/time."},"limit":{"maximum":1000,"minimum":1,"type":"number","format":"int32","default":1000,"description":"The number of test objects to return. By default, this call will return a maximum of 1000 test objects. The limit can be set to any number less than 1000."},"before-id":{"type":"number","format":"int64","default":10000,"description":"The test-id is the pagination ID used for this resource. Test-id objects with IDs immediately before this ID are returned. This parameter cannot be used if after-id is used."},"after-id":{"type":"number","format":"int64","description":"The test-id is the pagination ID used for this resource. Test objects with IDs immediately after this ID are returned. This parameter cannot be used if before-id is used."},"include-flag":{"type":"number","format":"int64","description":"Bit flag for any information you wish to include in the test object. If include-flag is not requested, all information is included. \r\nExample: To include general form information and informational meta data, use 65 to represent 1+ 64.\r\n**Bit Information**\r\n\r\n| Bit Flag                     | Bit Value |\r\n|------------------------------|-----------|\r\n| 1 = General Test Information | 1         |\r\n| 2 = Test Type                | 2         |\r\n| 3 = Audits                   | 4         |\r\n| 4 = Form Selection           | 8         |\r\n| 5 = Attempts                 | 16        |\r\n| 6 = Academic Models          | 32        |\r\n| 7 = Live in Application      | 64        |\r\n| 8 = Reporting & Exporting    | 128       |\r\n| 9 = Test Categories & Groups | 256       |\r\n| 10 = Start Test              | 512       |\r\n| 11 = Automatic Close         | 1024      |\r\n| 12 = Continuous Learning     | 2048      |\r\n| 13 = Observational           | 4096      |\r\n"}},"required":["program-id"]},
     method: "get",
     pathTemplate: "/Test/Query",
     executionParameters: [{"name":"program-id","in":"query"},{"name":"program-institution-id","in":"query"},{"name":"test-name","in":"query"},{"name":"test-id","in":"query"},{"name":"include-inactive","in":"query"},{"name":"include-demo","in":"query"},{"name":"last-modified-utc","in":"query"},{"name":"limit","in":"query"},{"name":"before-id","in":"query"},{"name":"after-id","in":"query"},{"name":"include-flag","in":"query"}],
@@ -992,17 +1037,6 @@ const toolDefinitionMap: Map<string, McpToolDefinition> = new Map([
   }],
 ]);
 
-/**
- * Security schemes from the OpenAPI spec
- */
-const securitySchemes =   {
-    "Default": {
-      "type": "http",
-      "description": "Bearer Token",
-      "scheme": "bearer",
-      "bearerFormat": "ITS provided JWT"
-    }
-  };
 
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -1022,6 +1056,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
     console.error(`Error: Unknown tool requested: ${toolName}`);
     return { content: [{ type: "text", text: `Error: Unknown tool requested: ${toolName}` }] };
   }
+  // Always pass our securitySchemes with Default as Bearer
   return await executeApiTool(toolName, toolDefinition, toolArgs ?? {}, securitySchemes);
 });
 
@@ -1154,6 +1189,15 @@ async function executeApiTool(
     toolArgs: JsonObject,
     allSecuritySchemes: Record<string, any>
 ): Promise<CallToolResult> {
+  // --- MCP 401 Triage Automation ---
+  const { env: loadedEnv, provenance } = loadEnvWithProvenance();
+  let token = loadedEnv.API_BEARER_TOKEN || process.env.API_BEARER_TOKEN || '';
+  let tokenSource = provenance.API_BEARER_TOKEN || 'process.env';
+  let baseUrl = loadedEnv.API_BASE_URL || process.env.API_BASE_URL || '';
+  let baseUrlSource = provenance.API_BASE_URL || 'process.env';
+  // Normalize token: strip whitespace, remove leading "Bearer "
+  token = token.trim().replace(/^Bearer\s+/i, '');
+  // ---
   try {
     // Validate arguments against the input schema
     let validatedArgs: JsonObject;
@@ -1171,27 +1215,54 @@ async function executeApiTool(
         }
     }
 
-    // Prepare URL, query parameters, headers, and request body
-    let urlPath = definition.pathTemplate;
-    const queryParams: Record<string, any> = {};
-    const headers: Record<string, string> = { 'Accept': 'application/json' };
-    let requestBodyData: any = undefined;
+  // Prepare URL, query parameters, headers, and request body
+  let urlPath = definition.pathTemplate;
+  const queryParams: Record<string, any> = {};
+  const headers: Record<string, string> = { 'Accept': 'application/json' };
+  let requestBodyData: any = undefined;
 
-    // Apply parameters to the URL path, query, or headers
-    definition.executionParameters.forEach((param) => {
+    // Special handling for QueryExamineeEvents: only include non-empty identifier arrays, and only one at a time
+    if (toolName === 'QueryExamineeEvents') {
+      // List of mutually exclusive identifier arrays
+      const idFields = ['examinee-id', 'program-examinee-system-id', 'program-examinee-public-id'];
+      let found = false;
+      for (const idField of idFields) {
+        const arr = validatedArgs[idField];
+        if (Array.isArray(arr) && arr.length > 0 && !found) {
+          // Send as scalar if only one value, else as array
+          queryParams[idField] = arr.length === 1 ? arr[0] : arr;
+          found = true;
+        }
+      }
+      // Add all other parameters except the mutually exclusive id arrays
+      definition.executionParameters.forEach((param) => {
+        if (idFields.includes(param.name)) return;
         const value = validatedArgs[param.name];
         if (typeof value !== 'undefined' && value !== null) {
-            if (param.in === 'path') {
-                urlPath = urlPath.replace(`{${param.name}}`, encodeURIComponent(String(value)));
-            }
-            else if (param.in === 'query') {
-                queryParams[param.name] = value;
-            }
-            else if (param.in === 'header') {
-                headers[param.name.toLowerCase()] = String(value);
-            }
+          if (param.in === 'path') {
+            urlPath = urlPath.replace(`{${param.name}}`, encodeURIComponent(String(value)));
+          } else if (param.in === 'query') {
+            queryParams[param.name] = value;
+          } else if (param.in === 'header') {
+            headers[param.name.toLowerCase()] = String(value);
+          }
         }
-    });
+      });
+    } else {
+      // Default parameter application logic
+      definition.executionParameters.forEach((param) => {
+        const value = validatedArgs[param.name];
+        if (typeof value !== 'undefined' && value !== null) {
+          if (param.in === 'path') {
+            urlPath = urlPath.replace(`{${param.name}}`, encodeURIComponent(String(value)));
+          } else if (param.in === 'query') {
+            queryParams[param.name] = value;
+          } else if (param.in === 'header') {
+            headers[param.name.toLowerCase()] = String(value);
+          }
+        }
+      });
+    }
 
     // Ensure all path parameters are resolved
     if (urlPath.includes('{')) {
@@ -1208,158 +1279,11 @@ async function executeApiTool(
     }
 
 
-    // Apply security requirements if available
-    // Security requirements use OR between array items and AND within each object
-    const appliedSecurity = definition.securityRequirements?.find(req => {
-        // Try each security requirement (combined with OR)
-        return Object.entries(req).every(([schemeName, scopesArray]) => {
-            const scheme = allSecuritySchemes[schemeName];
-            if (!scheme) return false;
-            
-            // API Key security (header, query, cookie)
-            if (scheme.type === 'apiKey') {
-                return !!process.env[`API_KEY_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-            }
-            
-            // HTTP security (basic, bearer)
-            if (scheme.type === 'http') {
-                if (scheme.scheme?.toLowerCase() === 'bearer') {
-                    return !!process.env[`BEARER_TOKEN_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-                }
-                else if (scheme.scheme?.toLowerCase() === 'basic') {
-                    return !!process.env[`BASIC_USERNAME_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`] && 
-                           !!process.env[`BASIC_PASSWORD_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-                }
-            }
-            
-            // OAuth2 security
-            if (scheme.type === 'oauth2') {
-                // Check for pre-existing token
-                if (process.env[`OAUTH_TOKEN_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`]) {
-                    return true;
-                }
-                
-                // Check for client credentials for auto-acquisition
-                if (process.env[`OAUTH_CLIENT_ID_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`] &&
-                    process.env[`OAUTH_CLIENT_SECRET_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`]) {
-                    // Verify we have a supported flow
-                    if (scheme.flows?.clientCredentials || scheme.flows?.password) {
-                        return true;
-                    }
-                }
-                
-                return false;
-            }
-            
-            // OpenID Connect
-            if (scheme.type === 'openIdConnect') {
-                return !!process.env[`OPENID_TOKEN_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-            }
-            
-            return false;
-        });
-    });
-
-    // If we found matching security scheme(s), apply them
-    if (appliedSecurity) {
-        // Apply each security scheme from this requirement (combined with AND)
-        for (const [schemeName, scopesArray] of Object.entries(appliedSecurity)) {
-            const scheme = allSecuritySchemes[schemeName];
-            
-            // API Key security
-            if (scheme?.type === 'apiKey') {
-                const apiKey = process.env[`API_KEY_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-                if (apiKey) {
-                    if (scheme.in === 'header') {
-                        headers[scheme.name.toLowerCase()] = apiKey;
-                        console.error(`Applied API key '${schemeName}' in header '${scheme.name}'`);
-                    }
-                    else if (scheme.in === 'query') {
-                        queryParams[scheme.name] = apiKey;
-                        console.error(`Applied API key '${schemeName}' in query parameter '${scheme.name}'`);
-                    }
-                    else if (scheme.in === 'cookie') {
-                        // Add the cookie, preserving other cookies if they exist
-                        headers['cookie'] = `${scheme.name}=${apiKey}${headers['cookie'] ? `; ${headers['cookie']}` : ''}`;
-                        console.error(`Applied API key '${schemeName}' in cookie '${scheme.name}'`);
-                    }
-                }
-            } 
-            // HTTP security (Bearer or Basic)
-            else if (scheme?.type === 'http') {
-        if (scheme.scheme?.toLowerCase() === 'bearer') {
-          const token = process.env[`BEARER_TOKEN_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`] || process.env.API_BEARER_TOKEN;
-          if (token) {
-            headers['authorization'] = `Bearer ${token}`;
-          }
-        } 
-                else if (scheme.scheme?.toLowerCase() === 'basic') {
-                    const username = process.env[`BASIC_USERNAME_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-                    const password = process.env[`BASIC_PASSWORD_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-                    if (username && password) {
-                        headers['authorization'] = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-                        console.error(`Applied Basic authentication for '${schemeName}'`);
-                    }
-                }
-            }
-            // OAuth2 security
-            else if (scheme?.type === 'oauth2') {
-                // First try to use a pre-provided token
-                let token = process.env[`OAUTH_TOKEN_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-                
-                // If no token but we have client credentials, try to acquire a token
-                if (!token && (scheme.flows?.clientCredentials || scheme.flows?.password)) {
-                    console.error(`Attempting to acquire OAuth token for '${schemeName}'`);
-                    token = (await acquireOAuth2Token(schemeName, scheme)) ?? '';
-                }
-                
-                // Apply token if available
-                if (token) {
-                    headers['authorization'] = `Bearer ${token}`;
-                    console.error(`Applied OAuth2 token for '${schemeName}'`);
-                    
-                    // List the scopes that were requested, if any
-                    const scopes = scopesArray as string[];
-                    if (scopes && scopes.length > 0) {
-                        console.error(`Requested scopes: ${scopes.join(', ')}`);
-                    }
-                }
-            }
-            // OpenID Connect
-            else if (scheme?.type === 'openIdConnect') {
-                const token = process.env[`OPENID_TOKEN_${schemeName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`];
-                if (token) {
-                    headers['authorization'] = `Bearer ${token}`;
-                    console.error(`Applied OpenID Connect token for '${schemeName}'`);
-                    
-                    // List the scopes that were requested, if any
-                    const scopes = scopesArray as string[];
-                    if (scopes && scopes.length > 0) {
-                        console.error(`Requested scopes: ${scopes.join(', ')}`);
-                    }
-                }
-            }
-        }
-    } 
-    // Log warning if security is required but not available
-    else if (definition.securityRequirements?.length > 0) {
-        // First generate a more readable representation of the security requirements
-        const securityRequirementsString = definition.securityRequirements
-            .map(req => {
-                const parts = Object.entries(req)
-                    .map(([name, scopesArray]) => {
-                        const scopes = scopesArray as string[];
-                        if (scopes.length === 0) return name;
-                        return `${name} (scopes: ${scopes.join(', ')})`;
-                    })
-                    .join(' AND ');
-                return `[${parts}]`;
-            })
-            .join(' OR ');
-            
-        console.warn(`Tool '${toolName}' requires security: ${securityRequirementsString}, but no suitable credentials found.`);
+    // Always set Authorization header for Default as Bearer, using normalized token
+    if (definition.securityRequirements?.some(req => Object.keys(req).includes('Default'))) {
+      headers['authorization'] = `Bearer ${token}`;
+      console.error(`[MCP-TRIAGE] Applied Bearer token for 'Default' security scheme from ${tokenSource}`);
     }
-    
 
     // Prepare the axios request configuration
     const config: AxiosRequestConfig = {
@@ -1370,11 +1294,61 @@ async function executeApiTool(
       ...(requestBodyData !== undefined && { data: requestBodyData }),
     };
 
-    // Log request info to stderr (doesn't affect MCP output)
-    console.error(`Executing tool "${toolName}": ${config.method} ${config.url}`);
-    
+    // --- MCP 401 Triage Logging ---
+    const redactedToken = token.slice(0, 10) + '...';
+    console.error(`[MCP-TRIAGE] Using API_BEARER_TOKEN from ${tokenSource}`);
+    console.error(`[MCP-TRIAGE] Using API_BASE_URL from ${baseUrlSource}`);
+    console.error(`[MCP-TRIAGE] Outgoing Authorization header: Bearer ${token.slice(0, 6)}...`);
+    console.error(`[MCP-TRIAGE] Effective URL: ${config.url}`);
+    // ...existing debug logs...
+    console.error(`\n==== MCP DEBUG: Executing tool "${toolName}" ====`);
+    console.error(`Request: ${config.method} ${config.url}`);
+    console.error(`Request headers: ${JSON.stringify(config.headers, null, 2)}`);
+    if (config.data !== undefined) {
+      console.error(`Request body: ${typeof config.data === 'string' ? config.data : JSON.stringify(config.data, null, 2)}`);
+    }
+
     // Execute the request
-    const response = await axios(config);
+    let response;
+    try {
+      response = await axios(config);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        // Log full error response
+        console.error(`\n==== MCP DEBUG: API Error Response ====`);
+        console.error(`Status: ${err.response.status}`);
+        console.error(`Response headers: ${JSON.stringify(err.response.headers, null, 2)}`);
+        console.error(`Response body: ${typeof err.response.data === 'string' ? err.response.data : JSON.stringify(err.response.data, null, 2)}`);
+        // --- MCP 401 Triage on 401 ---
+        if (err.response.status === 401) {
+          const wwwAuth = err.response.headers['www-authenticate'] || '';
+          const jwtHeader = decodeJwtPart(token, 'header');
+          const jwtPayload = decodeJwtPart(token, 'payload');
+          console.error('[MCP-TRIAGE] 401 Unauthorized');
+          console.error(`[MCP-TRIAGE] WWW-Authenticate: ${wwwAuth}`);
+          if (jwtHeader && jwtPayload) {
+            const { iss, aud, scp, roles, exp, nbf } = jwtPayload;
+            console.error('[MCP-TRIAGE] JWT claims:', {
+              iss, aud, scp, roles, exp, nbf,
+              header: jwtHeader,
+              payloadPrefix: JSON.stringify(jwtPayload).slice(0, 100) + '...'
+            });
+          } else {
+            console.error('[MCP-TRIAGE] Could not decode JWT');
+          }
+          console.error(`[MCP-TRIAGE] Token source: ${tokenSource}`);
+          console.error(`[MCP-TRIAGE] Base URL source: ${baseUrlSource}`);
+        }
+        // ---
+      }
+      throw err;
+    }
+
+    // Log full response
+    console.error(`\n==== MCP DEBUG: API Response ====`);
+    console.error(`Status: ${response.status}`);
+    console.error(`Response headers: ${JSON.stringify(response.headers, null, 2)}`);
+    console.error(`Response body: ${typeof response.data === 'string' ? response.data : JSON.stringify(response.data, null, 2)}`);
 
     // Process and format the response
     let responseText = '';
@@ -1415,24 +1389,63 @@ async function executeApiTool(
     // Handle errors during execution
     let errorMessage: string;
     
-    // Format Axios errors specially
-    if (axios.isAxiosError(error)) { 
-        errorMessage = formatApiError(error); 
+  // Enhanced error handling: surface full error details if available
+  if (axios.isAxiosError(error)) {
+    if (error.response) {
+      // Return full error details to the agent/caller, including request URL with querystring
+      let requestUrl = '';
+      let requestHeaders = '';
+      let requestBody = '';
+      let requestQueryParams = '';
+      if (error.config) {
+        // Reconstruct full URL with query params if available
+        const baseUrl = error.config.baseURL || '';
+        const urlPath = error.config.url || '';
+        let fullUrl = baseUrl ? baseUrl.replace(/\/$/, '') + '/' + urlPath.replace(/^\//, '') : urlPath;
+        if (error.config.params) {
+          const params = new URLSearchParams(error.config.params).toString();
+          if (params) {
+            fullUrl += (fullUrl.includes('?') ? '&' : '?') + params;
+            requestQueryParams = JSON.stringify(error.config.params, null, 2);
+          }
+        }
+        requestUrl = fullUrl;
+        if (error.config.headers) {
+          requestHeaders = JSON.stringify(error.config.headers, null, 2);
+        }
+        if (error.config.data) {
+          requestBody = typeof error.config.data === 'string' ? error.config.data : JSON.stringify(error.config.data, null, 2);
+        }
+      }
+      const errorText =
+        `API Error (Status: ${error.response.status}):\n` +
+        (requestUrl ? `Request URL: ${requestUrl}\n` : '') +
+        (requestHeaders ? `Request Headers: ${requestHeaders}\n` : '') +
+        (requestQueryParams ? `Request Query Params: ${requestQueryParams}\n` : '') +
+        (requestBody ? `Request Body: ${requestBody}\n` : '') +
+        `Response Headers: ${JSON.stringify(error.response.headers, null, 2)}\n` +
+        `Response Body: ${typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data, null, 2)}`;
+      return {
+        content: [{
+          type: "text",
+          text: errorText
+        }]
+      };
+    } else {
+      // No response, just return the error message
+      const errorMessage = formatApiError(error);
+      console.error(`Error during execution of tool '${toolName}':`, errorMessage);
+      return { content: [{ type: "text", text: errorMessage }] };
     }
-    // Handle standard errors
-    else if (error instanceof Error) { 
-        errorMessage = error.message; 
-    }
-    // Handle unexpected error types
-    else { 
-        errorMessage = 'Unexpected error: ' + String(error); 
-    }
-    
-    // Log error to stderr
+  } else if (error instanceof Error) {
+    const errorMessage = error.message;
     console.error(`Error during execution of tool '${toolName}':`, errorMessage);
-    
-    // Return error message to client
     return { content: [{ type: "text", text: errorMessage }] };
+  } else {
+    const errorMessage = 'Unexpected error: ' + String(error);
+    console.error(`Error during execution of tool '${toolName}':`, errorMessage);
+    return { content: [{ type: "text", text: errorMessage }] };
+  }
   }
 }
 
